@@ -1,82 +1,96 @@
 import {Component} from 'react'
+
 import './index.css'
 
 class Stopwatch extends Component {
-  state = {isRunning: false, currentSeconds: 0}
+  state = {
+    isTimerRunning: false,
+    timeElapsedInSeconds: 0,
+  }
 
-  renderMinutes = () => {
-    const {currentSeconds} = this.state
-    const minutes = Math.floor(currentSeconds / 60)
-    if (minutes < 10) {
-      return `0${minutes}`
-    }
-    return minutes
+  componentWillUnmount() {
+    clearInterval(this.timeInterval)
+  }
+
+  onResetTimer = () => {
+    clearInterval(this.timeInterval)
+    this.setState({isTimerRunning: false, timeElapsedInSeconds: 0})
+  }
+
+  onStopTimer = () => {
+    clearInterval(this.timeInterval)
+    this.setState({isTimerRunning: false})
+  }
+
+  updateTime = () => {
+    this.setState(prevState => ({
+      timeElapsedInSeconds: prevState.timeElapsedInSeconds + 1,
+    }))
+  }
+
+  onStartTimer = () => {
+    this.timeInterval = setInterval(this.updateTime, 1000)
+    this.setState({isTimerRunning: true})
   }
 
   renderSeconds = () => {
-    const {currentSeconds} = this.state
-    const seconds = Math.floor(currentSeconds % 60)
+    const {timeElapsedInSeconds} = this.state
+    const seconds = Math.floor(timeElapsedInSeconds % 60)
+
     if (seconds < 10) {
       return `0${seconds}`
     }
     return seconds
   }
 
-  runClock = () => {
-    this.setState(prevState => ({
-      currentSeconds: prevState.currentSeconds + 1,
-    }))
-  }
+  renderMinutes = () => {
+    const {timeElapsedInSeconds} = this.state
+    const minutes = Math.floor(timeElapsedInSeconds / 60)
 
-  startButton = () => {
-    this.intervalId = setInterval(this.runClock, 1000)
-  }
-
-  stopButton = () => {
-    clearInterval(this.intervalId)
-  }
-
-  restartButton = () => {
-    this.setState({currentSeconds: 0})
-    clearInterval(this.intervalId)
+    if (minutes < 10) {
+      return `0${minutes}`
+    }
+    return minutes
   }
 
   render() {
-    const displayTime = `${this.renderMinutes()}:${this.renderSeconds()}`
+    const {isTimerRunning} = this.state
+    const time = `${this.renderMinutes()}:${this.renderSeconds()}`
 
     return (
       <div className="app-container">
-        <div className="stop-watch-container">
-          <h1 className="main-heading">Stopwatch</h1>
+        <div className="stopwatch-container">
+          <h1 className="stopwatch">Stopwatch</h1>
           <div className="timer-container">
-            <div className="timer-image-container">
+            <div className="timer">
               <img
+                className="timer-image"
                 src="https://assets.ccbp.in/frontend/react-js/stopwatch-timer.png"
-                className="clock-icon"
                 alt="stopwatch"
               />
-              <p className="timer-text">Timer</p>
+              <p className="heading">Timer</p>
             </div>
-            <h1 className="timer">{displayTime}</h1>
-            <div className="buttons-container">
+            <h1 className="stopwatch-timer">{time}</h1>
+            <div className="timer-buttons">
               <button
                 type="button"
-                className="success button"
-                onClick={this.startButton}
+                className="start-button button"
+                onClick={this.onStartTimer}
+                disabled={isTimerRunning}
               >
                 Start
               </button>
               <button
                 type="button"
-                className="danger button"
-                onClick={this.stopButton}
+                className="stop-button button"
+                onClick={this.onStopTimer}
               >
                 Stop
               </button>
               <button
                 type="button"
-                className="warning button"
-                onClick={this.restartButton}
+                className="reset-button button"
+                onClick={this.onResetTimer}
               >
                 Reset
               </button>
